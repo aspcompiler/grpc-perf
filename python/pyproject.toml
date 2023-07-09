@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "grpc-perf"
+version = "0.1.0"
+description = ""
+authors = ["Li Chen <dotneteer@gmail.com>"]
+readme = "README.md"
+packages = [{include = "grpc_perf"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+grpcio = "^1.56.0"
+grpcio-tools = "^1.56.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

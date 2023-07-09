@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package server_streaming;
+
+service ServerStreaming {
+  rpc StreamingFromServer(StreamingFromServerRequest) returns (stream StreamingFromServerResponse);
+}
+
+message StreamingFromServerRequest {
+    int32 num_bytes = 1;
+}
+
+message StreamingFromServerResponse {
+    bytes data = 1;
+}
