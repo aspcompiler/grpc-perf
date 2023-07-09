@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 
 project(ServerStreaming C CXX)
 
-include(../../cmake/common.cmake)
+include(../cmake/common.cmake)
 
 # Proto file
 get_filename_component(ss_proto "../../protos/server_streaming.proto" ABSOLUTE)

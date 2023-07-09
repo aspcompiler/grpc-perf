@@ -56,8 +56,8 @@ class ServerStreamingClient {
             auto stop = high_resolution_clock::now();
             auto duration = duration_cast<milliseconds>(stop - start);
             if (status.ok()) {
-                std::cout << "Received " << bytes_received << " bytes in " << duration.count() << " milliseconds." << std::endl;
-                // std::cout << bytes_received / duration.count() << std::endl;
+                // std::cout << "Received " << bytes_received << " bytes in " << duration.count() << " milliseconds." << std::endl;
+                std::cout << (double)bytes_received * 1000 / duration.count() << std::endl;
             } else {
                 std::cout << "StreamingFromServer rpc failed." << std::endl;
             }
