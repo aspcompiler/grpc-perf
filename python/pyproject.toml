@@ -4,13 +4,17 @@ version = "0.1.0"
 description = ""
 authors = ["Li Chen <dotneteer@gmail.com>"]
 readme = "README.md"
-packages = [{include = "grpc_perf"}]
+packages = [{include = "server_streaming"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 grpcio = "^1.56.0"
 grpcio-tools = "^1.56.0"
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+pylint = "^2.17.4"
 
 [build-system]
 requires = ["poetry-core"]
