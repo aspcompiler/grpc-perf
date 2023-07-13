@@ -7,5 +7,6 @@ The following is the results so far:
 
 | client \ server | cpp sync  |
 | --------------- | --------- |
-| cpp             | 1264 MB/s |
+| cpp sync        | 1264 MB/s |
 | python          | 641 MB/s  |
+| rust-tonic      | 1434 MB/s |
