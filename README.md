@@ -3,7 +3,8 @@
 This is a mini benchmark for the user cases that I work with. It primary uses unitary-streaming call
 to retrieve a large a mount the data.
 
-The following is the results so far:
+The following is the results running on my MacBook Pro (15-inch, 2016) with 2.6 GHz 6-Core Intel 
+Core i7 and 16 GB memory running macOS Ventura 13.4.
 
 | client \ server | cpp sync  | rust tonic | python     |
 | --------------- | --------- | ---------- | ---------- |
