@@ -7,7 +7,7 @@ service ServerStreaming {
 }
 
 message StreamingFromServerRequest {
-    int32 num_bytes = 1;
+    uint32 num_bytes = 1;
 }
 
 message StreamingFromServerResponse {

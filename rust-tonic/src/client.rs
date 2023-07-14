@@ -5,7 +5,6 @@ pub mod server_streaming {
     tonic::include_proto!("server_streaming");
 }
 
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = ServerStreamingClient::connect("http://[::1]:50051").await?;
@@ -21,8 +20,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         bytes_received += response.data.len();
     }
     let duration = start.elapsed();
-    println!("{:.2}",
-        bytes_received as f64 / duration.as_secs_f64()
-    );
+    println!("{:.2}", bytes_received as f64 / duration.as_secs_f64());
     Ok(())
 }
