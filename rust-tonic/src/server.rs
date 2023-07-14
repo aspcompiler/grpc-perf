@@ -29,6 +29,7 @@ impl ServerStreaming for ServerStreamingService {
     ) -> Result<Response<Self::StreamingFromServerStream>, Status> {
         println!("StreamingFromServer = {:?}", request);
 
+        // The throughput is not sensitive to the channel size in this range. When increasing to 1024, the throughput is actually worse.
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
             let mut packet_index: u64 = 0;
@@ -58,6 +59,9 @@ impl ServerStreaming for ServerStreamingService {
                     // Construct new Vec
                     Vec::from_raw_parts(ptr, length, capacity)
                 };
+
+                // If we simply do the following, the throughput would increase to about 620 MB/s
+                // let data = vec![0; bytes_to_send as usize];
 
                 match tx
                     .send(Result::<_, Status>::Ok(StreamingFromServerResponse {

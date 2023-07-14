@@ -9,3 +9,9 @@ To run the client:
 ```bash
 $ cargo run  --release --bin client
 ```
+
+To run the server:
+
+```bash
+$ cargo run  --release --bin server
+```
