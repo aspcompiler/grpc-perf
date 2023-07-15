@@ -1,10 +1,7 @@
-use std::mem;
-
-use tokio::sync::mpsc;
-use tokio_stream::wrappers::ReceiverStream;
+use futures::Stream;
 use tonic::transport::Server;
 use tonic::{Request, Response, Status};
-use tracing::{error, info, Level};
+use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 use server_streaming::server_streaming_server::{ServerStreaming, ServerStreamingServer};
@@ -17,70 +14,43 @@ pub mod server_streaming {
 #[derive(Debug)]
 pub struct ServerStreamingService {}
 
-const MAX_MESSAGE_SIZE: u32 = 1 << 20;
+const MAX_MESSAGE_SIZE: usize = 1 << 20;
 
 #[tonic::async_trait]
 impl ServerStreaming for ServerStreamingService {
-    type StreamingFromServerStream = ReceiverStream<Result<StreamingFromServerResponse, Status>>;
+    type StreamingFromServerStream = MyServerLogic;
 
     async fn streaming_from_server(
         &self,
         request: Request<StreamingFromServerRequest>,
     ) -> Result<Response<Self::StreamingFromServerStream>, Status> {
-        println!("StreamingFromServer = {:?}", request);
+        info!("StreamingFromServer = {:?}", request);
+        Ok(Response::new(MyServerLogic {
+            total_bytes_to_handle: request.into_inner().num_bytes as usize,
+        }))
+    }
+}
 
-        // The throughput is not sensitive to the channel size in this range. When increasing to 1024, the throughput is actually worse.
-        let (tx, rx) = mpsc::channel(128);
-        tokio::spawn(async move {
-            let mut packet_index: u64 = 0;
-            let mut bytes_remaining = request.get_ref().num_bytes;
+pub struct MyServerLogic {
+    total_bytes_to_handle: usize,
+}
 
-            while bytes_remaining > 0 {
-                // handle protobuf size limits by only sending 1MB per message
-                let mut bytes_to_send = std::cmp::min(bytes_remaining, MAX_MESSAGE_SIZE);
-                bytes_remaining -= bytes_to_send;
-                let mut data: Vec<u64> = Vec::with_capacity(bytes_to_send as usize / 8);
-                while bytes_to_send > 0 {
-                    data.push(packet_index);
-                    bytes_to_send -= 8;
-                    packet_index += 1;
-                }
+impl Stream for MyServerLogic {
+    type Item = Result<StreamingFromServerResponse, Status>;
 
-                let data = unsafe {
-                    let ratio = mem::size_of::<u64>() / mem::size_of::<u8>();
-
-                    let length = data.len() * ratio;
-                    let capacity = data.capacity() * ratio;
-                    let ptr = data.as_mut_ptr() as *mut u8;
-
-                    // Don't run the destructor for vec32
-                    mem::forget(data);
-
-                    // Construct new Vec
-                    Vec::from_raw_parts(ptr, length, capacity)
-                };
-
-                // If we simply do the following, the throughput would increase to about 620 MB/s
-                // let data = vec![0; bytes_to_send as usize];
-
-                match tx
-                    .send(Result::<_, Status>::Ok(StreamingFromServerResponse {
-                        data,
-                    }))
-                    .await
-                {
-                    Ok(_) => {}
-                    Err(err) => {
-                        error!("get_results: failed to send data to client: {}", err);
-                        break;
-                    }
-                }
-            }
-
-            info!(" /// done sending");
-        });
-
-        Ok(Response::new(ReceiverStream::new(rx)))
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        _cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        if self.total_bytes_to_handle > 0 {
+            // handle protobuf size limits by only sending 1MB per message
+            let bytes_to_send = std::cmp::min(self.total_bytes_to_handle, MAX_MESSAGE_SIZE);
+            self.total_bytes_to_handle -= bytes_to_send;
+            let data = vec![0; bytes_to_send];
+            std::task::Poll::Ready(Some(Ok(StreamingFromServerResponse { data })))
+        } else {
+            std::task::Poll::Ready(None)
+        }
     }
 }
 
