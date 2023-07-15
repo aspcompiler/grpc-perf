@@ -24,7 +24,7 @@ impl ServerStreaming for ServerStreamingService {
         &self,
         request: Request<StreamingFromServerRequest>,
     ) -> Result<Response<Self::StreamingFromServerStream>, Status> {
-        info!("StreamingFromServer = {:?}", request);
+        // info!("StreamingFromServer = {:?}", request);
         Ok(Response::new(MyServerLogic {
             total_bytes_to_handle: request.into_inner().num_bytes as usize,
         }))
